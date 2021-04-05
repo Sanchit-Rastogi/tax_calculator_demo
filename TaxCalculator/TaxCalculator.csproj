@@ -7,5 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaxCalculator.Service\TaxCalculator.Service.csproj" />
+    <ProjectReference Include="..\TaxCalculator.Interface\TaxCalculator.Interface.csproj" />
   </ItemGroup>
 </Project>

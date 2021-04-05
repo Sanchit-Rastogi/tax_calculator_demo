@@ -1,51 +1,59 @@
 ﻿using System;
+using TaxCalculator.Interface;
 using TaxCalculator.Model;
 using TaxCalculator.Model.Constants;
 
 namespace TaxCalculator.Service
 {
-    public class CalculateService
+    public class CalculateService : ICalculator
     {
-        public Tax CalculateTaxAmount(int salary, int additionalIncome)
+        public Tax Tax = new Tax();
+
+        public bool CalculateTaxAmount(int salary, int additionalIncome)
         {
-            int TotalIncome = (salary * 12) + additionalIncome;
-            decimal taxPercentage;
-            int taxAmount;
-            if (TotalIncome <= 250000)
+            this.Tax.TotalIncome = (salary * 12) + additionalIncome;
+
+            if (this.Tax.TotalIncome <= 250000)
             {
-                taxAmount = 0;
-                taxPercentage = 0;
+                this.Tax.Amount = 0;
+                this.Tax.Percentage = 0;
             }
-            else if (TotalIncome > 250000 && TotalIncome <= 500000)
+            else if (this.Tax.TotalIncome > 250000 && this.Tax.TotalIncome <= 500000)
             {
-                taxAmount = Convert.ToInt32(TotalIncome * 0.05);
-                taxPercentage = 5;
+                this.Tax.Amount = Convert.ToInt32(this.Tax.TotalIncome * 0.05);
+                this.Tax.Percentage = 5;
             }
-            else if (TotalIncome > 500000 && TotalIncome <= 1000000)
+            else if (this.Tax.TotalIncome > 500000 && this.Tax.TotalIncome <= 1000000)
             {
-                taxAmount = Convert.ToInt32(TotalIncome * 0.2);
-                taxPercentage = 20;
+                this.Tax.Amount = Convert.ToInt32(this.Tax.TotalIncome * 0.2);
+                this.Tax.Percentage = 20;
             }
             else
             {
-                taxAmount = Convert.ToInt32(TotalIncome * 0.3);
-                taxPercentage = 30;
+                this.Tax.Amount = Convert.ToInt32(this.Tax.TotalIncome * 0.3);
+                this.Tax.Percentage = 30;
             }
-            Tax calculatedTax = new Tax() {
-                Amount = taxAmount,
-                Percentage = taxPercentage,
-                TotalIncome = TotalIncome
-            };
-            return calculatedTax;
+            
+            return true;
         }
 
-        public Tax TaxAfterExcemption(Tax calculatedTax, Constants.Excemption type, int excemptionAmount)
+        public bool TaxAfterExcemption(Constants.ExcemptionType type, int excemptionAmount)
         {
 
-            calculatedTax.Amount -= excemptionAmount;
-            calculatedTax.Percentage = decimal.Round(decimal.Divide(calculatedTax.Amount * 100 ,calculatedTax.TotalIncome),2);
+            Excemption excemption = Tax.Excemptions.Find(ex => ex.Type == type);
+            if (excemption != null)
+            {
+                return false;
+            }
 
-            return calculatedTax;
+            this.Tax.Amount -= excemptionAmount;
+            this.Tax.Percentage = decimal.Round(decimal.Divide(Tax.Amount * 100 ,Tax.TotalIncome),2);
+            this.Tax.Excemptions.Add(new Excemption() {
+                Amount = excemptionAmount,
+                Type = type
+            });
+
+            return true;
         } 
     
     }

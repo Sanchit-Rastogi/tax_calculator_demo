@@ -1,5 +1,4 @@
 ﻿using System;
-using TaxCalculator.Model;
 using TaxCalculator.Model.Constants;
 using TaxCalculator.Service;
 using TaxCalculator.Service.Utility;
@@ -9,9 +8,7 @@ namespace TaxCalculator
     public class TaxCalculator
     {
         CalculateService CalculateService;
-        Tax CalculatedTax;
-        Tax TaxAfterExcemption;
-        Utilities Utilities;
+        Utility UtilityService;
 
         public TaxCalculator()
         {
@@ -20,79 +17,94 @@ namespace TaxCalculator
 
         public void Initialize()
         {
-            CalculateService = new CalculateService();
-            CalculatedTax = new Tax();
-            TaxAfterExcemption = new Tax();
-            Utilities = new Utilities();
+            this.CalculateService = new CalculateService();
+            this.UtilityService = new Utility();
             MainMenu();
         }
 
         public void MainMenu()
         {
-            int salary = Utilities.GetIntegerInput("Tax Calculator \n Enter your monthly salary for current FY");
-            int additionalIncome = Utilities.GetIntegerInput("Enter any additional income for current FY");
-            CalculatedTax = CalculateService.CalculateTaxAmount(salary, additionalIncome);
-            ShowTaxes(CalculatedTax);
-            ExcemptionsMenu();
+            Console.WriteLine("Tax Calculator \n");
+            int salary = this.UtilityService.GetIntegerInput("Enter your monthly salary for current FY");
+            int additionalIncome = this.UtilityService.GetIntegerInput("Enter any additional income for current FY");
+            bool isCalculated = this.CalculateService.CalculateTaxAmount(salary, additionalIncome);
+            if (isCalculated)
+            {
+                ShowTaxes();
+                ExcemptionsMenu();
+            }
         }
 
         public void ExcemptionsMenu()
         {
-            string option = Utilities.GetStringInput("Do you want to submit any tax excemptions ? (Y/N)");
+            string option = this.UtilityService.GetStringInput("Do you want to submit any tax excemptions ? (Y/N)");
             switch (option.ToUpper())
             {
-                case "Y":
+                case Constants.Yes:
                     Excemptions();
+
                     break;
-                case "N":
-                    ShowTaxes(CalculatedTax);
+                case Constants.No:
+                    ShowTaxes();
+
                     break;
                 default:
                     Console.WriteLine("Please select a valid option !");
                     ExcemptionsMenu();
+
                     break;
             }
         }
 
         public void Excemptions() {
-            Constants.Excemption option = (Constants.Excemption)Utilities.GetIntegerInput("Please select the excemption type : - \n " +
-                "1.Section 1 - Hostel fees \n " +
+            Console.WriteLine("Excemptions : - \n" +
+                "1. Section 1 - Hostel fees \n" +
                 "2. Section 2 - Transportation fees");
-            int excemptionAmount = Utilities.GetIntegerInput("Enter excemption amount : - ");
+            Constants.ExcemptionType option = (Constants.ExcemptionType)this.UtilityService.GetIntegerInput("Please select the excemption type : - \n ");
+            int excemptionAmount = this.UtilityService.GetIntegerInput("Enter excemption amount : - ");
+            bool isApplied = false;
             switch (option)
             {
-                case Constants.Excemption.Hostel:
-                    if (excemptionAmount > 15000 || excemptionAmount < 1)
+                case Constants.ExcemptionType.Hostel:
+                    if (excemptionAmount > Constants.ExcemptionsList[0].Amount || excemptionAmount < 1)
                     {
                         Console.WriteLine("Invalid excemption amount");
-                        TaxAfterExcemption = CalculatedTax;
                         break;
                     }
-                    TaxAfterExcemption = CalculateService.TaxAfterExcemption(CalculatedTax, Constants.Excemption.Hostel, excemptionAmount);
+                    isApplied = this.CalculateService.TaxAfterExcemption(Constants.ExcemptionType.Hostel, excemptionAmount);
+
                     break;
-                case Constants.Excemption.Transport:
-                    if(excemptionAmount > 10000 || excemptionAmount < 1)
+                case Constants.ExcemptionType.Transport:
+                    if(excemptionAmount > Constants.ExcemptionsList[1].Amount || excemptionAmount < 1)
                     {
                         Console.WriteLine("Invalid excemption amount");
-                        TaxAfterExcemption = CalculatedTax;
                         break;
                     }
-                    TaxAfterExcemption = CalculateService.TaxAfterExcemption(CalculatedTax, Constants.Excemption.Transport, excemptionAmount);
+                    isApplied = this.CalculateService.TaxAfterExcemption(Constants.ExcemptionType.Transport, excemptionAmount);
+
                     break;
                 default:
                     Console.WriteLine("Enter a valid input : -");
                     Excemptions();
+
                     break;
             }
-            ShowTaxes(TaxAfterExcemption);
+            if (isApplied)
+                ExcemptionsMenu();
+            else
+            {
+                Console.WriteLine("Excemption not applied");
+                ShowTaxes();
+            }
+            
         }
 
-        public void ShowTaxes(Tax tax)
+        public void ShowTaxes()
         {
             Console.WriteLine("\n Your taxes for current FY are :- " +
-                "\n Your total income for current FY - Rs " + tax.TotalIncome.ToString() +
-                "\n Tax amount - Rs " + tax.Amount.ToString() +
-                "\n Tax percentage - " + tax.Percentage.ToString() + "% \n");
+                "\n Your total income for current FY - Rs " + this.CalculateService.Tax.TotalIncome.ToString() +
+                "\n Tax amount - Rs " + this.CalculateService.Tax.Amount.ToString() +
+                "\n Tax percentage - " + this.CalculateService.Tax.Percentage.ToString() + "% \n");
         }
     }
 }

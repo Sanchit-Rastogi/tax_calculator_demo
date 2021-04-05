@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace TaxCalculator.Service.Utility
 {
-    public class Utilities
+    public class Utility
     {
         public string GetStringInput(string displayText)
         {

@@ -6,9 +6,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaxCalculator.Model\TaxCalculator.Model.csproj" />
-    <ProjectReference Include="..\TaxCalculator.Interface\TaxCalculator.Interface.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utility\" />
   </ItemGroup>
 </Project>
