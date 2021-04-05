@@ -11,7 +11,6 @@ namespace TaxCalculator.Service
             int TotalIncome = (salary * 12) + additionalIncome;
             decimal taxPercentage;
             int taxAmount;
-            Console.WriteLine("Calculate function is running ..");
             if (TotalIncome <= 250000)
             {
                 taxAmount = 0;

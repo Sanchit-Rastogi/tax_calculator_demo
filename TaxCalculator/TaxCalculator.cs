@@ -2,15 +2,16 @@
 using TaxCalculator.Model;
 using TaxCalculator.Model.Constants;
 using TaxCalculator.Service;
+using TaxCalculator.Service.Utility;
 
 namespace TaxCalculator
 {
     public class TaxCalculator
     {
-
-        CalculateService CalculateService = new CalculateService();
-        Tax CalculatedTax = new Tax();
-        Tax TaxAfterExcemption = new Tax();
+        CalculateService CalculateService;
+        Tax CalculatedTax;
+        Tax TaxAfterExcemption;
+        Utilities Utilities;
 
         public TaxCalculator()
         {
@@ -19,16 +20,17 @@ namespace TaxCalculator
 
         public void Initialize()
         {
+            CalculateService = new CalculateService();
+            CalculatedTax = new Tax();
+            TaxAfterExcemption = new Tax();
+            Utilities = new Utilities();
             MainMenu();
         }
 
         public void MainMenu()
         {
-            Console.WriteLine("Tax Calculator \n ");
-            Console.WriteLine("Enter your monthly salary for current FY");
-            int salary = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Enter any additional income for current FY");
-            int additionalIncome = Convert.ToInt32(Console.ReadLine());
+            int salary = Utilities.GetIntegerInput("Tax Calculator \n Enter your monthly salary for current FY");
+            int additionalIncome = Utilities.GetIntegerInput("Enter any additional income for current FY");
             CalculatedTax = CalculateService.CalculateTaxAmount(salary, additionalIncome);
             ShowTaxes(CalculatedTax);
             ExcemptionsMenu();
@@ -36,8 +38,7 @@ namespace TaxCalculator
 
         public void ExcemptionsMenu()
         {
-            Console.WriteLine("Do you want to submit any tax excemptions ? (Y/N)");
-            string option = Console.ReadLine();
+            string option = Utilities.GetStringInput("Do you want to submit any tax excemptions ? (Y/N)");
             switch (option.ToUpper())
             {
                 case "Y":
@@ -54,17 +55,14 @@ namespace TaxCalculator
         }
 
         public void Excemptions() {
-            Console.WriteLine("Please select the excemption type : -");
-            Console.WriteLine("1. Section 1 - Hostel fees");
-            Console.WriteLine("2. Section 2 - Transportation fees");
-            Constants.Excemption option = (Constants.Excemption)Convert.ToInt32(Console.ReadLine());
-            int excemptionAmount = 0;
+            Constants.Excemption option = (Constants.Excemption)Utilities.GetIntegerInput("Please select the excemption type : - \n " +
+                "1.Section 1 - Hostel fees \n " +
+                "2. Section 2 - Transportation fees");
+            int excemptionAmount = Utilities.GetIntegerInput("Enter excemption amount : - ");
             switch (option)
             {
                 case Constants.Excemption.Hostel:
-                    Console.WriteLine("Enter excemption amount : - ");
-                    excemptionAmount = Convert.ToInt32(Console.ReadLine());
-                    if (excemptionAmount > 15000 && excemptionAmount < 1)
+                    if (excemptionAmount > 15000 || excemptionAmount < 1)
                     {
                         Console.WriteLine("Invalid excemption amount");
                         TaxAfterExcemption = CalculatedTax;
@@ -73,9 +71,7 @@ namespace TaxCalculator
                     TaxAfterExcemption = CalculateService.TaxAfterExcemption(CalculatedTax, Constants.Excemption.Hostel, excemptionAmount);
                     break;
                 case Constants.Excemption.Transport:
-                    Console.WriteLine("Enter excemption amount : - ");
-                    excemptionAmount = Convert.ToInt32(Console.ReadLine());
-                    if(excemptionAmount > 10000 && excemptionAmount < 1)
+                    if(excemptionAmount > 10000 || excemptionAmount < 1)
                     {
                         Console.WriteLine("Invalid excemption amount");
                         TaxAfterExcemption = CalculatedTax;
@@ -93,10 +89,10 @@ namespace TaxCalculator
 
         public void ShowTaxes(Tax tax)
         {
-            Console.WriteLine("\n Your taxes for current FY are :- \n");
-            Console.WriteLine("Your total income for current FY - Rs " + tax.TotalIncome.ToString());
-            Console.WriteLine("Tax amount - Rs " + tax.Amount.ToString());
-            Console.WriteLine("Tax percentage - " + tax.Percentage.ToString() + "%");
+            Console.WriteLine("\n Your taxes for current FY are :- " +
+                "\n Your total income for current FY - Rs " + tax.TotalIncome.ToString() +
+                "\n Tax amount - Rs " + tax.Amount.ToString() +
+                "\n Tax percentage - " + tax.Percentage.ToString() + "% \n");
         }
     }
 }
